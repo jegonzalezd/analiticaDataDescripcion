@@ -1,0 +1,104 @@
+function homologarPalabras() {
+  var hoja = SpreadsheetApp.openById('1odyz9yx9y7ZxZJo2A8Cp0U0dP3uC9yze264RabxfPhw'); // Reemplaza 'TU_ID_DE_HOJA' con el ID de tu hoja
+  var hojaDataHistorico = hoja.getSheetByName('DataHistorico'); // Accede a la hoja "DataHistorico"
+  
+  // Definir el mapa de palabras a homologar
+  var palabrasHomologadas = {
+    "Acceder": "Acceso",
+    "Actualización": "Actualizacion", "Actualizar": "Actualizacion",
+    "Admisión": "Admision",
+    "Aprobar": "Aprobacion", "Aprobación": "Aprobacion",
+    "Asignación": "Asignacion",
+    "Autenticación": "Autenticacion", "Autenticador": "Autenticacion", "Doble Factor": "Autenticacion",
+    "Respaldo": "Backup",
+    "Bitácora": "Bitacora",
+    "Configuración": "Configuracion",
+    "Clave": "Contraseña", "Credenciales": "Contraseña",
+    "Corrección": "Correccion", "Corregir": "Correccion",
+    "Crear": "Creacion", "Creación": "Creacion",
+    "Debloquea": "Desbloqueo",
+    "Devolución": "Devolucion",
+    "Egresar": "Egreso",
+    "Anular": "Eliminar", "Eliminacion": "Eliminar", "Eliminación": "Eliminar", "Eliminadas": "Eliminar", "Borrar": "Eliminar",
+    "Formatear": "Formateo",
+    "Formato de Epidemiologia": "Formatos de Epidemiologia",
+    "Historia Clínica": "Historia Clinica", "Historias Clinicas": "Historia Clinica", "Historias Clínicas": "Historia Clinica",
+    "Ingresar": "Ingreso",
+    "Inicio de sesión": "Inicio de sesion",
+    "Instalación": "Instalacion",
+    "Lentitud": "Lento",
+    "Migración": "Migracion",
+    "Modificacion": "Modificar", "Modificación": "Modificar",
+    "Obsolescencia": "Obsoleto",
+    "Parametrización": "Parametrizar", "Parametriza": "Parametrizar", "Parametrizacion": "Parametrizar",
+    "Reasignación": "Reasignacion",
+    "Revisión": "Revision",
+    "Salón": "Salon",
+    "Teclado": "Perifericos", "Mouse": "Perifericos",
+    "Tóner": "Toner", "Tonner": "Toner",
+    "Traslado": "Trasladar",
+    "Vale": "Vales",
+    "Vinculacion": "Vincular", "Vinculación": "Vincular",
+    "Software Settings": "Software",
+    "Correo Electrónico": "Correo Electronico",
+    "Conexión Humana": "Conexion Humana",
+    "Third Party": "Tercero",
+    "Portátil": "Equipo de Computo", "Portatil": "Equipo de Computo", "PC": "Equipo de Computo", "Mini PC": "Equipo de Computo", "Computador": "Equipo de Computo", "Equipo de Cómputo": "Equipo de Computo",
+    "BD": "Bases de Datos", "Base de Datos": "Bases de Datos",
+    "Chrome": "Navegador", 
+    "Escáner": "Escaner", "Scanner": "Escaner",
+    "Impresión": "Impresion", "Impresora": "Impresion",
+    "Afiliación Electrónica": "Afiliacion Electronica",
+    "Caja OSI": "Cajas OSI",
+    "Imagenología": "Imagenologia",
+    "Ofimática": "Ofimatica",
+    "Vale Electrónico": "Vale Electronico",
+    "Ebs": "Oracle",
+    "Cebra": "Zebra",
+  };
+  
+  // Obtener los rangos de datos de las columnas K, AO, H, AP
+  var ultimaFila = hojaDataHistorico.getLastRow(); // Obtener la última fila con datos
+  var rangoK = hojaDataHistorico.getRange(1, 11, ultimaFila); // Columna K (columna 11)
+  var rangoAO = hojaDataHistorico.getRange(1, 41, ultimaFila); // Columna AO (columna 41)
+  var rangoH = hojaDataHistorico.getRange(1, 8, ultimaFila); // Columna H (columna 8)
+  var rangoAP = hojaDataHistorico.getRange(1, 42, ultimaFila); // Columna AP (columna 42)
+  
+  // Obtener los valores de las celdas en cada columna
+  var valoresK = rangoK.getValues();
+  var valoresAO = rangoAO.getValues();
+  var valoresH = rangoH.getValues();
+  var valoresAP = rangoAP.getValues();
+  
+  // Función para homologar las palabras
+  function homologarTexto(texto, palabrasHomologadas) {
+    var palabras = texto.split(';'); // Dividir las palabras de la celda de la columna AO/AP
+    var palabrasFinales = [];
+    for (var i = 0; i < palabras.length; i++) {
+      var palabra = palabras[i].trim(); // Eliminar espacios extra
+      if (palabrasHomologadas[palabra]) {
+        palabrasFinales.push(palabrasHomologadas[palabra]); // Si hay una homologación, agregar la palabra homologada
+      } else {
+        palabrasFinales.push(palabra); // Si no hay homologación, dejar la palabra original
+      }
+    }
+    return palabrasFinales.join(';'); // Volver a unir las palabras con ";"
+  }
+  
+  // Iterar por cada fila
+  for (var i = 0; i < ultimaFila; i++) {
+    // Homologar el contenido de la columna AO comparando con la columna K
+    if (valoresAO[i][0] != '') {
+      valoresAO[i][0] = homologarTexto(valoresAO[i][0], palabrasHomologadas);
+    }
+    
+    // Homologar el contenido de la columna AP comparando con la columna H
+    if (valoresAP[i][0] != '') {
+      valoresAP[i][0] = homologarTexto(valoresAP[i][0], palabrasHomologadas);
+    }
+  }
+  
+  // Escribir los valores homologados de vuelta en la hoja
+  rangoAO.setValues(valoresAO);
+  rangoAP.setValues(valoresAP);
+}
