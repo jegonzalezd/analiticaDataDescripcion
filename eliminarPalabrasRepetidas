@@ -1,0 +1,36 @@
+function eliminarPalabrasRepetidas() {
+  // Obtén el ID del documento de Google Sheets (ajústalo con tu propio ID)
+  var sheetId = '1odyz9yx9y7ZxZJo2A8Cp0U0dP3uC9yze264RabxfPhw';  // Reemplaza con el ID de tu hoja de cálculo
+  var ss = SpreadsheetApp.openById(sheetId);  // Abre la hoja por su ID
+  
+  // Obtén la hoja "DataHistorico"
+  var hoja = ss.getSheetByName('DataHistorico');
+  
+  // Obtener los valores de las columnas AO y AP (asegurándonos que las filas a considerar son las mismas en ambas columnas)
+  var rangoAO = hoja.getRange('AO1:AO' + hoja.getLastRow()).getValues(); 
+  var rangoAP = hoja.getRange('AP1:AP' + hoja.getLastRow()).getValues();
+  
+  // Eliminar palabras repetidas en la columna AO (celda por celda)
+  var valoresAO = rangoAO.map(function(fila) {
+    return [quitarRepetidos(fila[0])];  // Retorna el valor limpio para cada celda en AO
+  });
+  
+  // Eliminar palabras repetidas en la columna AP (celda por celda)
+  var valoresAP = rangoAP.map(function(fila) {
+    return [quitarRepetidos(fila[0])];  // Retorna el valor limpio para cada celda en AP
+  });
+  
+  // Escribir los valores sin repeticiones de vuelta en las columnas AO y AP
+  hoja.getRange('AO1:AO' + hoja.getLastRow()).setValues(valoresAO);
+  hoja.getRange('AP1:AP' + hoja.getLastRow()).setValues(valoresAP);
+}
+
+// Función que elimina las palabras repetidas de una celda, considerando ";" como separador
+function quitarRepetidos(texto) {
+  if (!texto) return texto; // Si no hay texto, no hace nada
+  
+  // Separar el texto por ";", eliminar duplicados y luego unirlo de nuevo en una cadena
+  var palabras = texto.split(';');  // Separa las palabras por ";"
+  var palabrasUnicas = [...new Set(palabras)];  // Elimina las palabras duplicadas
+  return palabrasUnicas.join(';');  // Une las palabras sin duplicados de nuevo con ";"
+}
