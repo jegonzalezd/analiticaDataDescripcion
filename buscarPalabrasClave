@@ -1,0 +1,104 @@
+function buscarPalabrasClave() {
+  // ID del libro de Google Sheets
+  var archivoID = '1odyz9yx9y7ZxZJo2A8Cp0U0dP3uC9yze264RabxfPhw';  // Reemplaza este ID con el correcto
+  
+  // Acceder al libro por su ID
+  var libro = SpreadsheetApp.openById(archivoID);
+  
+  // Obtener la hoja llamada "DataHistorico"
+  var hoja = libro.getSheetByName('DataHistorico');
+  
+  // Verificar si la hoja existe
+  if (!hoja) {
+    Logger.log('No se encontró la hoja "DataHistorico" en el archivo');
+    return;
+  }
+  
+  // Palabras clave para la columna AO (Aplicacion)
+  var palabrasAplicacion = [
+    "Afiliacion Electronica", "Afiliación Electrónica", "Argos", "Athenea", "Audimed", "Avicena", "Azure", "Base de Datos", 
+    "Bases de Datos", "BD", "BH", "BMC", "Bukeala", "Caja OSI", "Cajas OSI", "Campus Virtual", "Carestream", "Chatbot", 
+    "Chrome", "Citrix", "Computador", "Conector OSI", "Conexion Humana", "Conexión Humana", "Correo Electronico", 
+    "Correo Electrónico", "Digiturno", "Directorio Activo", "Ebs", "Equipo de Computo", "Equipo de Cómputo", "Escaner", "Escáner", "Escritorio Virtual", 
+    "Excel", "FUS", "Google Drive", "Google Play", "Higea", "iFactura", "Imagenologia", "Imagenología", "Impresion", 
+    "Impresión", "Impresora", "Infoclic", "Kiosco", "Konector", "Medlab", "MFT", "Mitrol", "Mollier", "Navegador", "Office", 
+    "Oficina Virtual", "Ofimatica", "Ofimática", "OnBase", "Oracle", "PAM", "Portatil", "Portátil", "Proactiva", "Proactivo", "PSE", 
+    "Pyxis", "Qflow", "RPA", "SAP", "Scanner", "Skylab", "Software One", "Sophia", "Super Pacs", "Tablet", "Vale Electronico", 
+    "Vale Electrónico", "Validador", "VPN", "Vue Motion", "Webex", "Webpad", "Wiki", "Windows"
+  ];
+  
+  // Palabras clave para la columna AP (Reporte)
+  var palabrasReporte = [
+    "Acceder", "Acceso", "Actualizacion", "Actualización", "Actualizar", "Admision", "Admisión", "Anular", "Aprobacion", 
+    "Aprobación", "Aprobar", "Asignacion", "Asignación", "Asociar", "Atasco", "Autenticacion", "Autenticación", "Autenticador", 
+    "Backup", "Bitacora", "Bitácora", "Borrar", "Cambio de estado", "Cebra", "Chip", "Clave", "Configuracion", "Configuración", 
+    "Consumo", "Contraseña", "Correccion", "Corrección", "Corregir", "Creacion", "Creación", "Crear", "Credenciales", 
+    "Cuota Moderadora", "Debloquea", "Desbloqueo", "Despliegue", "Devolucion", "Devolución", "Disco Duro", "Doble Factor", 
+    "Egresar", "Egreso", "Eliminacion", "Eliminación", "Eliminadas", "Eliminar", "Enlazar", "Factura", "Firewall", "Formatear", 
+    "Formateo", "Formato de Epidemiologia", "Formatos de Epidemiologia", "Historia Clinica", "Historia Clínica", 
+    "Historias Clinicas", "Historias Clínicas", "Informe", "Ingresar", "Ingreso", "Inicio de sesion", "Inicio de sesión", 
+    "Instalacion", "Instalación", "Interfaz", "Job", "Lentitud", "Lento", "Licencia", "Mantenimiento", "Migracion", "Migración", 
+    "Modificacion", "Modificación", "Modificar", "Modulo", "Mouse", "Multifuncional", "Obsolescencia", "Obsoleto", "Pantalla", 
+    "Parametriza", "Parametrizacion", "Parametrización", "Parametrizar", "Pedido", "Perfilar", "Permisos", "Pines", "Planilla", 
+    "Reasignacion", "Reasignación", "Recalculo", "Reporte", "Respaldo", "Retiro", "Reversar", "Revision", "Revisión", "Salon", 
+    "Salón", "Script", "Teclado", "Temporales", "Toner", "Tóner", "Tonner", "Trasladar", "Traslado", "Vale", "Vales", 
+    "Vinculacion", "Vinculación", "Vincular", "XML", "Zebra"
+  ];
+  
+  // Establecer los títulos en las celdas AO1 y AP1
+  hoja.getRange('AO1').setValue('Aplicacion');
+  hoja.getRange('AP1').setValue('Reporte');
+  
+  // Obtener los datos de las columnas W, Z y AH
+  var datosW = hoja.getRange('W2:W' + hoja.getLastRow()).getValues();
+  var datosZ = hoja.getRange('Z2:Z' + hoja.getLastRow()).getValues();
+  var datosAH = hoja.getRange('AH2:AH' + hoja.getLastRow()).getValues();
+  
+  // Función para limpiar el texto y eliminar caracteres especiales (como comas y puntos)
+  function limpiarTexto(texto) {
+    return texto.trim()
+                .toLowerCase()  // Convertir todo a minúsculas
+                .replace(/[^a-záéíóúü\s]/g, '');  // Eliminar caracteres no alfabéticos (comas, puntos, etc.)
+  }
+
+  // Función para buscar las palabras clave en el texto
+  function buscarPalabrasClaveEnTexto(texto, palabras) {
+    var resultados = [];
+    var textoLimpiado = limpiarTexto(texto);
+    for (var i = 0; i < palabras.length; i++) {
+      if (textoLimpiado.includes(limpiarTexto(palabras[i]))) {
+        resultados.push(palabras[i]);
+      }
+    }
+    return resultados;
+  }
+
+  // Inicializar las listas de resultados
+  var resultadosAplicacion = [];
+  var resultadosReporte = [];
+
+  // Recorrer los datos y realizar las búsquedas
+  for (var i = 0; i < datosW.length; i++) {
+    var textoW = datosW[i][0];
+    var textoZ = datosZ[i][0];
+    var textoAH = datosAH[i][0];
+    
+    // Buscar las palabras clave en "Aplicación"
+    var resultadoAplicacion = buscarPalabrasClaveEnTexto(textoW, palabrasAplicacion).concat(
+                                buscarPalabrasClaveEnTexto(textoZ, palabrasAplicacion),
+                                buscarPalabrasClaveEnTexto(textoAH, palabrasAplicacion));
+    
+    // Buscar las palabras clave en "Reporte"
+    var resultadoReporte = buscarPalabrasClaveEnTexto(textoW, palabrasReporte).concat(
+                             buscarPalabrasClaveEnTexto(textoZ, palabrasReporte),
+                             buscarPalabrasClaveEnTexto(textoAH, palabrasReporte));
+    
+    // Colocar las palabras clave separadas por ';' en las columnas AO y AP
+    resultadosAplicacion.push([resultadoAplicacion.join(';') || '']);
+    resultadosReporte.push([resultadoReporte.join(';') || '']);
+  }
+  
+  // Colocar los resultados en las columnas AO y AP
+  hoja.getRange(2, 41, resultadosAplicacion.length, 1).setValues(resultadosAplicacion);  // Colocar en la columna AO
+  hoja.getRange(2, 42, resultadosReporte.length, 1).setValues(resultadosReporte);  // Colocar en la columna AP
+}
