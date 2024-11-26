@@ -1,0 +1,30 @@
+function rellenarCeldasVacias() {
+  var hoja = SpreadsheetApp.openById('1odyz9yx9y7ZxZJo2A8Cp0U0dP3uC9yze264RabxfPhw'); // Sustituye 'TU_ID_DE_HOJA' con el ID de tu hoja
+  var hojaDataHistorico = hoja.getSheetByName('DataHistorico'); // Accede a la hoja "DataHistorico"
+  
+  // Obtiene el rango de datos de las columnas AO, AP, K y H
+  var ultimaFila = hojaDataHistorico.getLastRow(); // Obtener la última fila con datos
+  var rangoAO = hojaDataHistorico.getRange(1, 41, ultimaFila); // Columna AO (columna 41)
+  var rangoAP = hojaDataHistorico.getRange(1, 42, ultimaFila); // Columna AP (columna 42)
+  var rangoK = hojaDataHistorico.getRange(1, 11, ultimaFila); // Columna K (columna 11)
+  var rangoH = hojaDataHistorico.getRange(1, 8, ultimaFila); // Columna H (columna 8)
+  
+  // Obtener los valores de las celdas en cada columna
+  var valoresAO = rangoAO.getValues();
+  var valoresAP = rangoAP.getValues();
+  var valoresK = rangoK.getValues();
+  var valoresH = rangoH.getValues();
+  
+  // Iterar sobre cada fila y revisar si las celdas de las columnas AO y AP están vacías
+  for (var i = 0; i < ultimaFila; i++) {
+    if (valoresAO[i][0] == '') {
+      // Si la celda de la columna AO está vacía, agregar el texto de la columna K
+      hojaDataHistorico.getRange(i + 1, 41).setValue(valoresK[i][0]);
+    }
+    if (valoresAP[i][0] == '') {
+      // Si la celda de la columna AP está vacía, agregar el texto de la columna H
+      hojaDataHistorico.getRange(i + 1, 42).setValue(valoresH[i][0]);
+    }
+  }
+}
+
